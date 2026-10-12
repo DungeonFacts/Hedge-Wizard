@@ -7,8 +7,9 @@ class Card:
         return tag in self.tags
 
 class Slot:
-    def __init__(self, card=None):
+    def __init__(self, card=None, required_tags=None):
         self.card = card
+        self.required_tags = required_tags or set()
 
     def is_empty(self):
         return self.card is None
@@ -34,5 +35,9 @@ VALID_TAGS = {"expensive", "sacred", "raw_food", "cooked_food", "unpleasant"}
 chicken = Card("Chicken", {"raw_food"})
 sacred_oil = Card("Sacred Oil", {"sacred", "expensive"})
 
+altar = Slot(required_tags={"sacred"})
+altar.place_card(sacred_oil)
+
 print(chicken.name, chicken.tags)
 print(sacred_oil.name, sacred_oil.tags)
+print(altar.is_filled())
