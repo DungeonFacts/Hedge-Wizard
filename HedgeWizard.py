@@ -11,33 +11,38 @@ class Slot:
         self.card = card
         self.required_tags = required_tags or set()
 
-    def is_empty(self):
-        return self.card is None
+    def is_filled(self):
+        if self.card is not None:
+            return True
+        else:
+            return False
+
 
     def place_card(self, card):
-        if not self.is_empty():
-            raise ValueError("Slot is already occupied.")
-        self.card = card
+        if self.required_tags <= card.tags and not self.is_filled():
+            self.card = card
+            return True
+        else:
+            return False
+
 
     def remove_card(self):
-        if self.is_empty():
-            raise ValueError("Slot is already empty.")
-        removed_card = self.card
-        self.card = None
-        return removed_card
+        if self.is_filled():
+            removed_card = self.card
+            self.card = None
+            return removed_card
+        
 
-    def is_filled(self):
-        if not self.is_empty():
-            print (f"Slot is filled with card: {self.card.name}")
-
-VALID_TAGS = {"expensive", "sacred", "raw_food", "cooked_food", "unpleasant"}
+        
+## VALID_TAGS = {"expensive", "sacred", "raw_food", "cooked_food", "unpleasant"}
 
 chicken = Card("Chicken", {"raw_food"})
 sacred_oil = Card("Sacred Oil", {"sacred", "expensive"})
-
 altar = Slot(required_tags={"sacred"})
-altar.place_card(sacred_oil)
-
-print(chicken.name, chicken.tags)
-print(sacred_oil.name, sacred_oil.tags)
-print(altar.is_filled())
+assert altar.place_card(sacred_oil) is True  # Should return True since sacred_oil has the "sacred" tag
+assert altar.is_filled() is True  # Should return True since the slot is now filled with sacred_oil
+assert altar.place_card(sacred_oil) is False  # Should return False since the slot is already filled
+assert altar.remove_card() is sacred_oil  # Should return the sacred_oil card that was removed
+assert not altar.is_filled()  # Should return False since the slot is now empty
+assert altar.place_card(chicken) is False  # Should return False since chicken does not have the "sacred" tag
+assert not altar.is_filled()  # Should return False since the slot is still empty
