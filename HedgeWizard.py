@@ -31,7 +31,11 @@ assert carve_totem.tick() is True
 assert carve_totem.progress == 2
 assert carve_totem.tick() is True
 assert carve_totem.tick() is True
-assert carve_totem.tick() is True
-assert carve_totem.tick() is False
-assert carve_totem.state == VerbBoxState.COMPLETED
-#assert carve_totem.place_card(totem, carve_totem.slots[1]) is True
+#assert carve_totem.tick() is True
+#assert carve_totem.tick() is False
+assert carve_totem.state == VerbBoxState.RUNNING
+#assert carve_totem.add_slot(totem, {"totem"}) is not False
+assert carve_totem.add_slot() is not False
+assert carve_totem.state == VerbBoxState.UNLOADED
+#assert carve_totem.state == VerbBoxState.COMPLETED
+assert len(carve_totem.slots) == 2

@@ -50,6 +50,13 @@ class VerbBox:
         self.state = VerbBoxState.UNLOADED
 
 
+    def add_slot(self, card=None, required_tags=None):
+        new_slot = Slot(card=card, required_tags=required_tags)
+        self.slots.append(new_slot)
+        self.update_state()
+        return new_slot
+
+
     def is_loaded(self):
         for slot in self.slots:
             if not slot.is_filled():
@@ -99,3 +106,13 @@ class VerbBox:
             return True
         else:
             return False
+
+#test_box = VerbBox("test_box", slots=[Slot(required_tags={"wizard"})], duration=2)
+#wizard = Card("Wizard", {"wizard"})
+#totem  = Card("Totem", {"totem"})
+
+#assert test_box.place_card(wizard, test_box.slots[0]) is True
+#assert test_box.add_slot(totem, required_tags={"totem"}) is not False
+#assert len(test_box.slots) == 2
+#assert test_box.slots[0].required_tags == {"wizard"}
+#assert test_box.slots[1].required_tags == {"totem"}
