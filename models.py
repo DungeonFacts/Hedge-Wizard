@@ -1,10 +1,5 @@
 from enum import Enum
-
-class Card:
-    def __init__(self, name, tags=None):
-        self.name = name
-        self.tags = tags or set()
-
+from cards import make_card
 
 class Slot:
     def __init__(self, card=None, required_tags=None):
@@ -106,13 +101,3 @@ class VerbBox:
             return True
         else:
             return False
-
-#test_box = VerbBox("test_box", slots=[Slot(required_tags={"wizard"})], duration=2)
-#wizard = Card("Wizard", {"wizard"})
-#totem  = Card("Totem", {"totem"})
-
-#assert test_box.place_card(wizard, test_box.slots[0]) is True
-#assert test_box.add_slot(totem, required_tags={"totem"}) is not False
-#assert len(test_box.slots) == 2
-#assert test_box.slots[0].required_tags == {"wizard"}
-#assert test_box.slots[1].required_tags == {"totem"}
