@@ -61,8 +61,10 @@ class VerbBox:
 
 
     def generate_result(self, card_key):
-        result = make_card(card_key)
-        self.add_slot(card=result, required_tags=None)
+        if self.result is not None:
+            for card_key in {self.result}:
+                result_output = make_card(card_key)
+                self.add_slot(card=result_output, required_tags=None)
 
 
     def update_state(self):
@@ -103,8 +105,8 @@ class VerbBox:
         if self.state == VerbBoxState.RUNNING:
             self.progress += 1
             if self.progress >= self.duration:
-                self.generate_result(self.result)
                 self.state = VerbBoxState.COMPLETED
+                self.generate_result(self.result)
             return True
         else:
             return False

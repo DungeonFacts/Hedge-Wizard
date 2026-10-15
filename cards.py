@@ -5,7 +5,7 @@ class Card:
 
 
     def __repr__(self):
-        return f"Card('{self.name}', '{self.tags}')"
+        return f"Card('{self.name}', {self.tags})"
 
 CARD_TEMPLATES = {
     "wizard":{"name":"Wizard","tags":{"wizard"}},

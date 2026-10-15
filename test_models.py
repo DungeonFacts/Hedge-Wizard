@@ -21,7 +21,7 @@ def test_slot_accepts_valid_card():
 def test_slot_rejects_wrong_tag():
     altar = Slot(required_tags={"sacred"})
     a = make_card("chicken")
-    altar.place_card(a)
+    assert altar.place_card(a) is False
     assert altar.is_filled() is False
 
 
@@ -58,7 +58,10 @@ def test_basic_box_lifecycle():
     a.tick()
     assert a.state == VerbBoxState.RUNNING
     assert a.progress == 1
+    assert len(a.slots) == 1
     a.tick()
+    assert a.slots[1].card.name == 'Totem'
+    assert len (a.slots) == 2
     assert a.state == VerbBoxState.COMPLETED
     assert a.progress == 2
 
@@ -117,3 +120,27 @@ def test_add_slot():
     a.add_slot(card=None, required_tags=None)
     assert len(a.slots) == 4
     assert a.state == VerbBoxState.COMPLETED
+
+def test_rewards_duplicate_events_are_not_identical():
+    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, result="totem")
+    b = make_card("wizard")
+    c = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, result="totem")
+    assert a.state == VerbBoxState.UNLOADED
+    a.place_card(b, a.slots[0])
+    assert a.state == VerbBoxState.LOADED
+    assert a.progress == 0
+    a.start()
+    assert a.state == VerbBoxState.RUNNING
+    assert a.progress == 0
+    a.tick()
+    assert a.state == VerbBoxState.RUNNING
+    assert a.progress == 1
+    a.tick()
+    assert a.state == VerbBoxState.COMPLETED
+    assert a.slots[1].card.name == 'Totem'
+    c.place_card(b, c.slots[0])
+    c.start()
+    c.tick()
+    c.tick()
+    assert c.slots[1].card.name == 'Totem'
+    assert a.slots[1].card is not c.slots[1].card
