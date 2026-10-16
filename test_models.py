@@ -18,6 +18,14 @@ def test_slot_accepts_valid_card():
     assert slot.card is a
 
 
+def test_slot_force_card_ignores_required_tags():
+    totem = make_card("totem")
+    slot = Slot(required_tags={"wizard"})
+    assert slot.place_card(totem) is False
+    assert slot.force_card(totem) is True
+    assert slot.card == totem
+
+
 def test_slot_rejects_wrong_tag():
     altar = Slot(required_tags={"sacred"})
     a = make_card("chicken")
@@ -195,9 +203,9 @@ def test_consume():
 
 
 def test_replacement():
-    lignify = VerbBox("Lignify Chicken", slots=[Slot(required_tags={"raw_food"}, fate=SlotFate.REPLACE, replacement="rubber_chicken")], duration=1)
+    lignify = VerbBox("Lignify Chicken", slots=[Slot(required_tags={"raw_food"}, fate=SlotFate.REPLACE, replacement="totem")], duration=1)
     chicken = make_card("chicken")
     lignify.place_card(chicken, lignify.slots[0])
     lignify.start()
     lignify.tick()
-    assert lignify.slots[0].card.name == 'Rubber Chicken'
+    assert lignify.slots[0].card.name == 'Totem'

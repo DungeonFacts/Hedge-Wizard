@@ -30,6 +30,11 @@ class Slot:
             return False
 
 
+    def force_card(self, card):
+        self.card = card
+        return True
+
+
     def remove_card(self):
         if self.is_filled():
             removed_card = self.card
@@ -82,7 +87,7 @@ class VerbBox:
                 self.remove_card(slot)
                 new_card = slot.replacement
                 replacement = make_card(new_card)
-                self.place_card(replacement, slot)
+                self.force_card(replacement, slot)
 
 
     def update_state(self):
@@ -98,6 +103,12 @@ class VerbBox:
     def place_card(self, card, slot):
         if slot.place_card(card) is True:
             self.update_state()
+            return True
+        else:
+            return False
+
+    def force_card(self, card, slot):
+        if slot.force_card(card) is True:
             return True
         else:
             return False
