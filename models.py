@@ -1,10 +1,18 @@
 from enum import Enum
 from cards import make_card
 
+class SlotFate(Enum):
+    KEEP = 1
+    CONSUME = 2
+    REPLACE = 3
+
+
 class Slot:
-    def __init__(self, card=None, required_tags=None):
+    def __init__(self, card=None, required_tags=None, fate=SlotFate.KEEP, replacement=None):
         self.card = card
         self.required_tags = required_tags or set()
+        self.fate = fate
+        self.replacement = replacement
 
 
     def is_filled(self):
@@ -46,8 +54,8 @@ class VerbBox:
         self.results = results or []
 
 
-    def add_slot(self, card=None, required_tags=None):
-        new_slot = Slot(card=card, required_tags=required_tags)
+    def add_slot(self, card=None, required_tags=None, fate=None):
+        new_slot = Slot(card=card, required_tags=required_tags, fate=fate)
         self.slots.append(new_slot)
         self.update_state()
         return new_slot
@@ -61,10 +69,20 @@ class VerbBox:
 
 
     def generate_results(self):
-        if self.results is not None:
-            for card_key in self.results:
-                result_output = make_card(card_key)
-                self.add_slot(card=result_output, required_tags=None)
+        for card_key in self.results:
+            result_output = make_card(card_key)
+            self.add_slot(card=result_output, required_tags=None)
+
+
+    def fulfill_fate(self):
+        for slot in self.slots:
+            if slot.fate == SlotFate.CONSUME:
+                self.remove_card()
+            if slot.fate == SlotFate.REPLACE:
+                self.remove_card()
+                replacement = slot.replacement
+                make_card(replacement)
+                self.place_card(replacement)
 
 
     def update_state(self):
@@ -106,6 +124,7 @@ class VerbBox:
             self.progress += 1
             if self.progress >= self.duration:
                 self.state = VerbBoxState.COMPLETED
+                self.fulfill_fate()
                 self.generate_results()
             return True
         else:

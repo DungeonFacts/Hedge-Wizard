@@ -1,4 +1,4 @@
-from models import Slot, VerbBox, VerbBoxState
+from models import Slot, SlotFate, VerbBox, VerbBoxState
 from cards import make_card
 
 def test_make_card_results_are_not_identical():
@@ -64,6 +64,20 @@ def test_basic_box_lifecycle():
     assert len (a.slots) == 2
     assert a.state == VerbBoxState.COMPLETED
     assert a.progress == 2
+    #test extra tick does not produce another slot
+    a.tick()
+    assert len (a.slots) == 2
+    assert a.state == VerbBoxState.COMPLETED
+    assert a.progress == 2
+
+def test_empty_results_box():
+    distraction = VerbBox("A Distraction", slots=[Slot(required_tags={"wizard"})], duration=1, results=None)
+    wizard = make_card("wizard")
+    distraction.place_card(wizard, distraction.slots[0])
+    distraction.start()
+    distraction.tick()
+    assert distraction.state == VerbBoxState.COMPLETED
+    assert len(distraction.slots) == 1
 
 
 def test_multi_result_spawns_not_identical():
@@ -169,3 +183,21 @@ def test_rewards_duplicate_events_are_not_identical():
     c.tick()
     assert c.slots[1].card.name == 'Totem'
     assert a.slots[1].card is not c.slots[1].card
+
+
+def test_consume():
+    bonfire = VerbBox("Burn Totem", slots=[Slot(required_tags={"totem"})], fate=SlotFate.CONSUME, duration=1)
+    offering = make_card("totem")
+    bonfire.place_card(offering, bonfire.slots[0])
+    bonfire.start()
+    bonfire.tick()
+    assert lignify.slots[0].is_filled == False
+
+
+def test_replacement():
+    lignify = VerbBox("Lignify Chicken", slots=[Slot(required_tags={"raw_food"}, fate=SlotFate.REPLACE, replacement="totem")], duration=1)
+    chicken = make_card("chicken")
+    lignify.place_card(chicken, lignify.slots[0])
+    lignify.start()
+    lignify.tick()
+    assert lignify.slots[0].card.name == 'Totem'
