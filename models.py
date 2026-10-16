@@ -54,7 +54,7 @@ class VerbBox:
         self.results = results or []
 
 
-    def add_slot(self, card=None, required_tags=None, fate=None):
+    def add_slot(self, card=None, required_tags=None, fate=SlotFate.KEEP):
         new_slot = Slot(card=card, required_tags=required_tags, fate=fate)
         self.slots.append(new_slot)
         self.update_state()
@@ -77,12 +77,12 @@ class VerbBox:
     def fulfill_fate(self):
         for slot in self.slots:
             if slot.fate == SlotFate.CONSUME:
-                self.remove_card()
+                self.remove_card(slot)
             if slot.fate == SlotFate.REPLACE:
-                self.remove_card()
-                replacement = slot.replacement
-                make_card(replacement)
-                self.place_card(replacement)
+                self.remove_card(slot)
+                new_card = slot.replacement
+                replacement = make_card(new_card)
+                self.place_card(replacement, slot)
 
 
     def update_state(self):

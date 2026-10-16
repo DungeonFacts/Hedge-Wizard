@@ -186,18 +186,18 @@ def test_rewards_duplicate_events_are_not_identical():
 
 
 def test_consume():
-    bonfire = VerbBox("Burn Totem", slots=[Slot(required_tags={"totem"})], fate=SlotFate.CONSUME, duration=1)
+    bonfire = VerbBox("Burn Totem", slots=[Slot(required_tags={"totem"}, fate=SlotFate.CONSUME)], duration=1)
     offering = make_card("totem")
     bonfire.place_card(offering, bonfire.slots[0])
     bonfire.start()
     bonfire.tick()
-    assert lignify.slots[0].is_filled == False
+    assert not bonfire.slots[0].is_filled()
 
 
 def test_replacement():
-    lignify = VerbBox("Lignify Chicken", slots=[Slot(required_tags={"raw_food"}, fate=SlotFate.REPLACE, replacement="totem")], duration=1)
+    lignify = VerbBox("Lignify Chicken", slots=[Slot(required_tags={"raw_food"}, fate=SlotFate.REPLACE, replacement="rubber_chicken")], duration=1)
     chicken = make_card("chicken")
     lignify.place_card(chicken, lignify.slots[0])
     lignify.start()
     lignify.tick()
-    assert lignify.slots[0].card.name == 'Totem'
+    assert lignify.slots[0].card.name == 'Rubber Chicken'
