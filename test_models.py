@@ -46,7 +46,7 @@ def test_slot_rejects_if_already_filled():
 
 
 def test_basic_box_lifecycle():
-    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, result="totem")
+    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, results=["totem"])
     b = make_card("wizard")
     assert a.state == VerbBoxState.UNLOADED
     a.place_card(b, a.slots[0])
@@ -66,8 +66,32 @@ def test_basic_box_lifecycle():
     assert a.progress == 2
 
 
+def test_multi_result_spawns_not_identical():
+    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, results=["totem","totem"])
+    b = make_card("wizard")
+    assert a.state == VerbBoxState.UNLOADED
+    a.place_card(b, a.slots[0])
+    assert a.state == VerbBoxState.LOADED
+    assert a.progress == 0
+    a.start()
+    assert a.state == VerbBoxState.RUNNING
+    assert a.progress == 0
+    a.tick()
+    assert a.state == VerbBoxState.RUNNING
+    assert a.progress == 1
+    assert len(a.slots) == 1
+    a.tick()
+    assert a.slots[0].card.name == 'Wizard'
+    assert a.slots[1].card.name == 'Totem'
+    assert a.slots[2].card.name == 'Totem'
+    assert a.slots[1].card is not a.slots[2].card
+    assert len (a.slots) == 3
+    assert a.state == VerbBoxState.COMPLETED
+    assert a.progress == 2
+
+
 def test_interrupt_box_lifecycle():
-    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, result="totem")
+    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, results=["totem"])
     b = make_card("wizard")
     assert a.state == VerbBoxState.UNLOADED
     a.place_card(b, a.slots[0])
@@ -95,7 +119,7 @@ def test_interrupt_box_lifecycle():
 
 
 def test_add_slot():
-    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, result="totem")
+    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, results=["totem"])
     b = make_card("wizard")
     c = make_card("chicken")
     assert a.state == VerbBoxState.UNLOADED
@@ -122,9 +146,10 @@ def test_add_slot():
     assert a.state == VerbBoxState.COMPLETED
 
 def test_rewards_duplicate_events_are_not_identical():
-    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, result="totem")
+    a = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, results=["totem"])
     b = make_card("wizard")
-    c = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, result="totem")
+    c = VerbBox("Carve Totem", slots=[Slot(required_tags={"wizard"})], duration=2, results=["totem"])
+    d = make_card("wizard")
     assert a.state == VerbBoxState.UNLOADED
     a.place_card(b, a.slots[0])
     assert a.state == VerbBoxState.LOADED
@@ -138,7 +163,7 @@ def test_rewards_duplicate_events_are_not_identical():
     a.tick()
     assert a.state == VerbBoxState.COMPLETED
     assert a.slots[1].card.name == 'Totem'
-    c.place_card(b, c.slots[0])
+    c.place_card(d, c.slots[0])
     c.start()
     c.tick()
     c.tick()

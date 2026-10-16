@@ -37,13 +37,13 @@ class VerbBoxState(Enum):
 
 
 class VerbBox:
-    def __init__(self, name, slots=None, duration=1, result=None):
+    def __init__(self, name, slots=None, duration=1, results=None):
         self.name = name
         self.slots = slots or []
         self.duration = duration
         self.progress = 0
         self.state = VerbBoxState.UNLOADED
-        self.result = result
+        self.results = results or []
 
 
     def add_slot(self, card=None, required_tags=None):
@@ -60,9 +60,9 @@ class VerbBox:
         return True
 
 
-    def generate_result(self, card_key):
-        if self.result is not None:
-            for card_key in {self.result}:
+    def generate_results(self):
+        if self.results is not None:
+            for card_key in self.results:
                 result_output = make_card(card_key)
                 self.add_slot(card=result_output, required_tags=None)
 
@@ -106,7 +106,7 @@ class VerbBox:
             self.progress += 1
             if self.progress >= self.duration:
                 self.state = VerbBoxState.COMPLETED
-                self.generate_result(self.result)
+                self.generate_results()
             return True
         else:
             return False
