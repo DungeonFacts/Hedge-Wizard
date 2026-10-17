@@ -1,3 +1,3 @@
 Inspired heavily by Cultist Simulator, Hedge Wizard is a turn-based game of time and resource management. You play as a wizard in a small village, dividing your time between the study of magic, assisting the villagers, and tending to the various magical entities in your surroundings. Everything in the game is represented by cards, which you assign to various tasks and events to pursue your various goals.
 
-Hedge Wizard is a small personal project made for the purpose of learning to code, written in the Python language. This is purely for my education and entertainment.
+Hedge Wizard is a small personal project made for the purpose of learning to code, written in the Python language. This is purely for my education and entertainment. To continue development and testing, create a python virtual environment, install pytest, and run pytest to confirm that all tests pass.

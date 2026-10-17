@@ -14,6 +14,8 @@ CARD_TEMPLATES = {
     "sacred_perfume":{"name":"Sacred Perfume", "tags":{"odorous","sacred"}},
     "chicken":{"name":"Chicken", "tags":{"raw_food"}},
     "rubber_chicken":{"name":"Rubber Chicken", "tags":{"raw_food"}},
+    "baby":{"name":"Baby", "tags":{"baby"}},
+    "blessed_baby":{"name":"Blessed Baby", "tags":{"baby","sacred"}}
 }
 
 def make_card(key):

@@ -209,3 +209,22 @@ def test_replacement():
     lignify.start()
     lignify.tick()
     assert lignify.slots[0].card.name == 'Totem'
+
+
+def test_all_fates_combined():
+    bless_baby = VerbBox("Bless Baby", slots=([Slot(required_tags={"wizard"}), Slot(required_tags={"baby"}, fate=SlotFate.REPLACE, replacement="blessed_baby"), Slot(required_tags={"sacred"}, fate=SlotFate.CONSUME)]), duration=1)
+    baby = make_card("baby")
+    wizard = make_card("wizard")
+    oil = make_card("sacred_oil")
+    bless_baby.place_card(wizard, bless_baby.slots[0])
+    bless_baby.place_card(baby, bless_baby.slots[1])
+    bless_baby.place_card(oil, bless_baby.slots[2])
+    assert bless_baby.slots[0].card.name == 'Wizard'
+    assert bless_baby.slots[1].card.name == 'Baby'
+    assert bless_baby.slots[2].card.name == 'Sacred Oil'
+    bless_baby.start()
+    bless_baby.tick()
+    assert bless_baby.state is VerbBoxState.COMPLETED
+    assert bless_baby.slots[0].card.name == 'Wizard'
+    assert bless_baby.slots[1].card.name == 'Blessed Baby'
+    assert bless_baby.slots[2].card is None

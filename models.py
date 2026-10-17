@@ -59,8 +59,8 @@ class VerbBox:
         self.results = results or []
 
 
-    def add_slot(self, card=None, required_tags=None, fate=SlotFate.KEEP):
-        new_slot = Slot(card=card, required_tags=required_tags, fate=fate)
+    def add_slot(self, card=None, required_tags=None, fate=SlotFate.KEEP, replacement=None):
+        new_slot = Slot(card=card, required_tags=required_tags, fate=fate, replacement=replacement)
         self.slots.append(new_slot)
         self.update_state()
         return new_slot
