@@ -1,5 +1,6 @@
 from models import Slot, SlotFate, VerbBox, VerbBoxState
 from cards import make_card
+from events import spawn_event
 
 def test_make_card_results_are_not_identical():
     a = make_card("wizard")
@@ -228,3 +229,15 @@ def test_all_fates_combined():
     assert bless_baby.slots[0].card.name == 'Wizard'
     assert bless_baby.slots[1].card.name == 'Blessed Baby'
     assert bless_baby.slots[2].card is None
+
+
+def test_event_basic():
+    wizard = make_card("wizard")
+    welcome = spawn_event("welcome")
+    assert welcome.name == "Welcome"
+    assert welcome.narrative_text == "Welcome to Hedge Wizard. You are a wizard, and this card is you."
+    assert welcome.deadline == None
+    assert welcome.verbbox == "Slot(wizard,wizard,SlotFate.KEEP,None)"
+    assert welcome.becomes == "get_started"
+
+test_event_basic()

@@ -15,6 +15,10 @@ class Slot:
         self.replacement = replacement
 
 
+    def __repr__(self):
+        return f"Slot({self.card},{self.required_tags},{self.fate},{self.replacement})"
+
+
     def is_filled(self):
         if self.card is not None:
             return True
@@ -57,6 +61,10 @@ class VerbBox:
         self.progress = 0
         self.state = VerbBoxState.UNLOADED
         self.results = results or []
+
+
+    def __repr__(self):
+        return f"VerbBox({self.name},{self.slots},{self.duration},{self.progress},{self.state},{self.results})"
 
 
     def add_slot(self, card=None, required_tags=None, fate=SlotFate.KEEP, replacement=None):
