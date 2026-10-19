@@ -255,3 +255,22 @@ def test_events_spawn_different_verbboxes():
     b = make_event("get_started")
     assert a is not b
     assert a.verbbox is not b.verbbox
+
+
+def test_event_box_contents_are_built_and_not_shared():
+    a = make_event("get_started")
+    b = make_event("get_started")
+    assert a.verbbox.slots[0].required_tags == {"wizard"}
+    assert a.verbbox.slots[0].card is None
+    assert a.verbbox.results == ["totem"]
+    assert a.verbbox.slots[0] is not b.verbbox.slots[0]
+    assert a.verbbox.results is not b.verbbox.results
+
+
+def test_complex_event_box():
+    a = make_event("your_first_potion")
+    b = make_event("your_first_potion")
+    assert a.slots[0].card.name == "Tea Leaves"
+    assert a.slots[0] is not b.slots[0]
+    assert a.slots[0].card is not b.slots[0].card
+    assert a.verbbox.slots[0].card == None

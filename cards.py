@@ -15,7 +15,9 @@ CARD_TEMPLATES = {
     "chicken":{"name":"Chicken", "tags":{"raw_food"}},
     "rubber_chicken":{"name":"Rubber Chicken", "tags":{"raw_food"}},
     "baby":{"name":"Baby", "tags":{"baby"}},
-    "blessed_baby":{"name":"Blessed Baby", "tags":{"baby","sacred"}}
+    "blessed_baby":{"name":"Blessed Baby", "tags":{"baby","sacred"}},
+    "tea_leaves":{"name":"Tea Leaves", "tags":{"reagent","raw_food"}},
+    "tea":{"name":"Tea", "tags":{"edible"}}
 }
 
 def make_card(key):
