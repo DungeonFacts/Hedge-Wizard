@@ -20,26 +20,34 @@ class Event:
         unread_message = False
         slot_blocking = False
         verb_blocking = False
-        if self.slots is None and self.verbbox is None and self.acknowledged is False:
-            unread_message = True
+        slot_empty = False
         if self.slots is not None:
             for index in range(len(self.slots)):
                 if self.slots[index].is_filled() is True:
                     slot_blocking = True
-                    break                
+                    break
+                elif self.slots[index].is_filled() is False:
+                    slot_empty = True              
         if self.verbbox is not None:
             if self.verbbox.state is VerbBoxState.COMPLETED:
                 for index in range(len(self.verbbox.slots)):
                     if self.verbbox.slots[index].is_filled() is True:
                         verb_blocking = True
                         break
+        if self.acknowledged is False:
+            if self.slots is None and self.verbbox is None:
+                unread_message = True
+            elif slot_empty is True and self.verbbox is None:
+                unread_message = True
+            elif slot_empty is True and self.verbbox.state is VerbBoxState.COMPLETED:
+                unread_message = True
         blockers = [unread_message, slot_blocking, verb_blocking]
-        if any(blockers) is True:
+        if any(blockers):
             return True
         else:
             return False
 
-
+        
     def ack(self):
             self.acknowledged = True
         
@@ -85,7 +93,7 @@ EVENT_TEMPLATES = {
         "slots":[{"card":"tea_leaves", "required_tags":{"reagent","raw_food"}}],
         "verbbox":{
             "name":"Brew Some Tea",
-            "slots":[{"required_tags":{"reagent","raw_food"}, "fate":{SlotFate.REPLACE}, "replacement":"tea"}],
+            "slots":[{"required_tags":{"reagent","raw_food"}, "fate":SlotFate.REPLACE, "replacement":"tea"}],
             "duration":1,
             "results":[]
             },

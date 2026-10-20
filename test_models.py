@@ -283,7 +283,20 @@ def test_event_message_window_is_blocker():
     assert intro.is_blocking() is False
 
 
-def test_is_blocking():
+def test_empty_gift_window_is_blocker():
+    welcome = make_event("welcome")
+    assert welcome.slots[0].card.name is "Wizard"
+    assert welcome.is_blocking() is True
+    welcome.slots[0].remove_card()
+    assert welcome.slots[0].card is None
+    assert welcome.acknowledged is False
+    assert welcome.slots[0].is_filled() is False
+    assert welcome.is_blocking() is True
+    welcome.ack()
+    assert welcome.is_blocking() is False
+
+
+def test_unclaimed_completed_event_is_blocking():
     a = make_event("your_first_potion")
     assert a.slots[0].card.name == "Tea Leaves"
     assert a.verbbox.slots[0].card == None
@@ -291,6 +304,7 @@ def test_is_blocking():
     removed_card = a.slots[0].remove_card()
     a.verbbox.place_card(removed_card,a.verbbox.slots[0])
     assert a.slots[0].card is None
+    #should not block because this will become loaded
     assert a.is_blocking() is False
     assert a.verbbox.state == VerbBoxState.LOADED
     a.verbbox.start()
@@ -299,3 +313,15 @@ def test_is_blocking():
     assert a.is_blocking() is True
     assert a.verbbox.slots[0].fate is SlotFate.REPLACE
     assert a.verbbox.slots[0].card.name == "Tea"
+    #test that removing tea still requires acknowledgement
+    a.verbbox.slots[0].remove_card()
+    assert a.verbbox.slots[0].card is None
+    assert a.is_blocking() is True
+    a.ack()
+    assert a.is_blocking() is False
+
+
+def test_player_may_pass_after_claiming_gift():
+    a = make_event("your_first_potion")
+    a.slots[0].remove_card()
+    assert a.is_blocking() is False
