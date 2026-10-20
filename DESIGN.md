@@ -116,3 +116,37 @@ A box has a name, a list of slots, a duration in ticks, a progress counter, a st
 - What replacing a villager card costs: a replaced card loses its individual identity.
 - Where event definitions live and in what format (a Python dictionary now, possibly JSON later).
 - Whether inputs are consumed when a task completes (current behavior) or when it starts.
+
+###### Update 10/19/2026 ######
+
+- Answers to open questions:
+    Inventory carries over between days (which can include angry villagers). Some events may respawn the next day (permanent ones such as "Carve Totem" and renewable ones such as "Herb Box").
+    Placing cards into a completed box will not be offered by the UI.
+    Events require acknowledgement for any resolution method, so consume-only events will follow this standard.
+    Standardizing on replacement minimizes edge cases. "Play the hand you are dealt" is preferred over trying to custom-build a perfect solution to every problem.
+    Replacing villagers will have some generic cases (Angry Villagers can accumulate and end the game) but others will be bespoke questline-style progressions.
+    For now we'll build in dictionaries, JSON can come later (this is a stretch goal for learning, mostly).
+    Inputs will continue to be consumed when the task completes. For interruptible tasks this lets us swap cards, uninterruptible ones will simply block the slot. (Which reminds me that I'll need to ask if Events have an Interruptible flag.)
+
+- Architecture update:
+    The new Event class and list of events currently live in events.py, which also holds the templates for the functions make_event and make_slot. Events can spawn with slots (e.g. something given to the player at the start of an event), with verbs (most events will focus on the action the player chooses to take), or with both slots and a verb. For now, Events can have an arbitrary number of slots, and one only verb.
+    Naming convention for factory functions is make_foo.
+
+- With Events added to the code base, our next objective is the event.tick() function which determines what happens, exactly, when the 'End Turn' button is pressed. Broadly, each event should check for status, progress on verbs should increment, check for completion, decrement the deadline on non-completed events, and return to the player to set up the next turn. Deadline is defined as the number of turns remaining before the event expires. There are four salient test cases:
+    1. Normal completion: an event with a RUNNING verb box updates to COMPLETED. Results for the verb box spawn (and can be claimed the next turn). The deadline counter no longer measures whether a pending job can fail, so it can decremented to 0. The event waits for the player to take any kept or spawned cards, and acknowledge completion before dismissing.
+    2. Expiry: an event with an UNLOADED verb box that the player has chosen not to fill this turn. At End Turn, no verbs should advance, the deadline is decremented. If doing so renders the event unachievable (i.e. the deadline is less than the event duration minus progress), it will display its fail state (note that this can be as mild as the card returning to the event queue, or as extreme as spawning negative cards).
+    3. Tie case: a RUNNING event with a Deadline of 1 and a (Duration - Progress) of 1. These are likely to be the majority of results. Decrementing the Deadline first would result in failure, and as such we run verb.tick() and increment progress first, check for completion, and then decrement the Deadline to 0 in cases of a tie. This is effectively a special case of Normal Completion.
+    4. Deadline = None. These are tasks that never expire. The most obvious use case is for tasks that can be done indefinitely at any time, and long-term progression 'questline' style events. RUNNING verbs will need to progress and possibly complete and spawn results, but no deadline check is necessary.
+
+- As such, basic sketch of the event.tick() function:
+    1. Check the status of each event.
+    2. Events with no status (such as a plain message window) halt the tick() and force the player to acknowledge.
+    3. For events that were already COMPLETED, halt the tick() and force the player to acknowledge the events.
+    4. Report to the engine to HALT if there are unacknowledged events. If not, proceed to tick remaining events.
+    5. For events with a LOADED verb status, run verb.start() and verb.tick().
+    6. For events with a RUNNING verb status, increment verb progress (verb.tick()).
+    7. For events that thereby update to a COMPLETED status, spawn results. Then, decrement the deadline.
+    8. For events with an UNLOADED verb status, decrement the deadline.
+    9. For events that now have a deadline < (duration - progress), flag for replacement with failstate.
+    10. For events that have a deadline of None, they will pass on UNLOADED, start() and tick() on LOADED, tick() on RUNNING, and halt to require acknowledgement if they were already COMPLETED.
+    11. Pass to the engine that End Turn should either HALT, or that all Events have been ticked.

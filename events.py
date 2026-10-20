@@ -16,26 +16,9 @@ class Event:
         return f"Event({self.name},{self.deadline},{self.slots},{self.verbbox},{self.acknowledged},{self.becomes})"
 
 
-    def has_verb_status(self):
-        if self.verbbox is not None:
-            return True
-
-
     def tick(self):
-        if self.has_verb_status() is True and self.deadline > 0:
-            status = self.verbbox.state
-            if status == VerbBoxState.UNLOADED:
-                pass #WIP
-            elif status == VerbBoxState.LOADED:
-                self.verbbox.start()
-                self.verbbox.tick()
-            elif status == VerbBoxState.RUNNING:
-                self.verbbox.tick()
-            elif status == VerbBoxState.COMPLETED:
-                pass #WIP
-            self.deadline -=1
-        else:
-            pass
+        ### WIP, See DESIGN.md ###
+        pass
             
 EVENT_TEMPLATES = {
     "welcome":{
@@ -51,7 +34,12 @@ EVENT_TEMPLATES = {
         "narrative_text":"In this game, you'll receive tasks to resolve by playing your cards. Let's start by having your wizard carve a totem.",
         "deadline":1,
         "slots":None,
-        "verbbox":{"name":"A Wizard Is You", "slots":[{"required_tags":{"wizard"}}], "duration":0, "results":["totem"]},
+        "verbbox":{
+            "name":"A Wizard Is You",
+            "slots":[{"required_tags":{"wizard"}}],
+            "duration":0,
+            "results":["totem"]
+            },
         "becomes":None
         },
     "your_first_potion":{
@@ -59,7 +47,12 @@ EVENT_TEMPLATES = {
         "narrative_text":"To get you started, here's a reagent you can brew into a potion. Place it in the slot below, and brew it!",
         "deadline":1,
         "slots":[{"card":"tea_leaves", "required_tags":{"reagent","raw_food"}}],
-        "verbbox":{"name":"Brew Some Tea", "slots":[{"required_tags":{"reagent","raw_food"}}], "duration":0, "results":["tea"]},
+        "verbbox":{
+            "name":"Brew Some Tea",
+            "slots":[{"required_tags":{"reagent","raw_food"}}],
+            "duration":1,
+            "results":["tea"]
+            },
         "becomes":None
         }
     }
