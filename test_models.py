@@ -285,7 +285,7 @@ def test_event_message_window_is_blocker():
 
 def test_empty_gift_window_is_blocker():
     welcome = make_event("welcome")
-    assert welcome.slots[0].card.name is "Wizard"
+    assert welcome.slots[0].card.name == "Wizard"
     assert welcome.is_blocking() is True
     welcome.slots[0].remove_card()
     assert welcome.slots[0].card is None
@@ -324,4 +324,22 @@ def test_unclaimed_completed_event_is_blocking():
 def test_player_may_pass_after_claiming_gift():
     a = make_event("your_first_potion")
     a.slots[0].remove_card()
+    assert a.is_blocking() is False
+
+
+def test_verb_only_events_block_without_ack():
+    a = make_event("get_started")
+    wizard = make_card("wizard")
+    assert a.slots is None
+    a.verbbox.place_card(wizard,a.verbbox.slots[0])
+    assert a.verbbox.slots[0].card is wizard
+    a.verbbox.start()
+    a.verbbox.tick()
+    assert a.verbbox.state == VerbBoxState.COMPLETED
+    a.verbbox.slots[0].remove_card()
+    a.verbbox.slots[1].remove_card()
+    assert a.verbbox.slots[0].card is None
+    assert a.verbbox.slots[1].card is None
+    assert a.is_blocking() is True
+    a.ack()
     assert a.is_blocking() is False

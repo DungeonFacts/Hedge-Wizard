@@ -37,6 +37,8 @@ class Event:
         if self.acknowledged is False:
             if self.slots is None and self.verbbox is None:
                 unread_message = True
+            elif self.slots is None and self.verbbox.state is VerbBoxState.COMPLETED:
+                unread_message = True
             elif slot_empty is True and self.verbbox is None:
                 unread_message = True
             elif slot_empty is True and self.verbbox.state is VerbBoxState.COMPLETED:
