@@ -16,14 +16,50 @@ class Event:
         return f"Event({self.name},{self.deadline},{self.slots},{self.verbbox},{self.acknowledged},{self.becomes})"
 
 
+    def is_blocking(self):
+        unread_message = False
+        slot_blocking = False
+        verb_blocking = False
+        if self.slots is None and self.verbbox is None and self.acknowledged is False:
+            unread_message = True
+        if self.slots is not None:
+            for index in range(len(self.slots)):
+                if self.slots[index].is_filled() is True:
+                    slot_blocking = True
+                    break                
+        if self.verbbox is not None:
+            if self.verbbox.state is VerbBoxState.COMPLETED:
+                for index in range(len(self.verbbox.slots)):
+                    if self.verbbox.slots[index].is_filled() is True:
+                        verb_blocking = True
+                        break
+        blockers = [unread_message, slot_blocking, verb_blocking]
+        if any(blockers) is True:
+            return True
+        else:
+            return False
+
+
+    def ack(self):
+            self.acknowledged = True
+        
+    
     def tick(self):
         ### WIP, See DESIGN.md ###
         pass
             
 EVENT_TEMPLATES = {
+    "intro":{
+        "name":"Introduction",
+        "narrative_text":"Welcome to Hedge Wizard. Click the button below to start the game.",
+        "deadline":None,
+        "slots":None,
+        "verbbox":None,
+        "becomes":"welcome"
+        },
     "welcome":{
         "name":"Welcome",
-        "narrative_text":"Welcome to Hedge Wizard. You are a wizard, and this card is you.",
+        "narrative_text":"This card represents you, the wizard. Click it to add it to your tableau.",
         "deadline":None,
         "slots":[{"card":"wizard", "required_tags":{"wizard"}}],
         "verbbox":None,
@@ -49,9 +85,9 @@ EVENT_TEMPLATES = {
         "slots":[{"card":"tea_leaves", "required_tags":{"reagent","raw_food"}}],
         "verbbox":{
             "name":"Brew Some Tea",
-            "slots":[{"required_tags":{"reagent","raw_food"}}],
+            "slots":[{"required_tags":{"reagent","raw_food"}, "fate":{SlotFate.REPLACE}, "replacement":"tea"}],
             "duration":1,
-            "results":["tea"]
+            "results":[]
             },
         "becomes":None
         }

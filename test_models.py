@@ -234,7 +234,7 @@ def test_all_fates_combined():
 def test_event_basic():
     welcome = make_event("welcome")
     assert welcome.name == "Welcome"
-    assert welcome.narrative_text == "Welcome to Hedge Wizard. You are a wizard, and this card is you."
+    assert welcome.narrative_text == "This card represents you, the wizard. Click it to add it to your tableau."
     assert welcome.deadline == None
     assert welcome.slots[0].required_tags == {'wizard'}
     assert welcome.becomes == "get_started"
@@ -274,3 +274,28 @@ def test_complex_event_box():
     assert a.slots[0] is not b.slots[0]
     assert a.slots[0].card is not b.slots[0].card
     assert a.verbbox.slots[0].card == None
+
+
+def test_event_message_window_is_blocker():
+    intro = make_event("intro")
+    assert intro.is_blocking() is True
+    intro.ack()
+    assert intro.is_blocking() is False
+
+
+def test_is_blocking():
+    a = make_event("your_first_potion")
+    assert a.slots[0].card.name == "Tea Leaves"
+    assert a.verbbox.slots[0].card == None
+    assert a.is_blocking() is True
+    removed_card = a.slots[0].remove_card()
+    a.verbbox.place_card(removed_card,a.verbbox.slots[0])
+    assert a.slots[0].card is None
+    assert a.is_blocking() is False
+    assert a.verbbox.state == VerbBoxState.LOADED
+    a.verbbox.start()
+    a.verbbox.tick()
+    assert a.verbbox.state == VerbBoxState.COMPLETED
+    assert a.is_blocking() is True
+    assert a.verbbox.slots[0].fate is SlotFate.REPLACE
+    assert a.verbbox.slots[0].card.name == "Tea"
