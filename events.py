@@ -2,7 +2,7 @@ from models import Slot, SlotFate, VerbBox, VerbBoxState
 from cards import make_card
 
 class Event:
-    def __init__(self, name, narrative_text="The text for this event has not been written.", deadline=None, slots=None, verbbox=None, becomes=None):
+    def __init__(self, name, narrative_text="The text for this event has not been written.", deadline=None, slots=None, verbbox=None, becomes=None, fails_to=None):
         self.name = name
         self.narrative_text = narrative_text
         self.deadline = deadline
@@ -10,6 +10,7 @@ class Event:
         self.verbbox = verbbox
         self.acknowledged = False
         self.becomes = becomes
+        self.fails_to = fails_to
 
 
     def __repr__(self):
@@ -55,9 +56,15 @@ class Event:
         
     
     def tick(self):
-        ### WIP, See DESIGN.md ###
-        pass
-            
+        self.verbbox.start()
+        self.verbbox.tick()
+        if self.deadline is not None:
+            self.deadline -= 1
+        self.acknowledged = False
+        return True
+
+
+
 EVENT_TEMPLATES = {
     "intro":{
         "name":"Introduction",
@@ -65,7 +72,8 @@ EVENT_TEMPLATES = {
         "deadline":None,
         "slots":None,
         "verbbox":None,
-        "becomes":"welcome"
+        "becomes":"welcome",
+        "fails_to":None
         },
     "welcome":{
         "name":"Welcome",
@@ -73,7 +81,8 @@ EVENT_TEMPLATES = {
         "deadline":None,
         "slots":[{"card":"wizard", "required_tags":{"wizard"}}],
         "verbbox":None,
-        "becomes":"get_started"
+        "becomes":"get_started",
+        "fails_to":None
         },
     "get_started":{
         "name":"Let's Get Started",
@@ -86,7 +95,8 @@ EVENT_TEMPLATES = {
             "duration":0,
             "results":["totem"]
             },
-        "becomes":None
+        "becomes":None,
+        "fails_to":None
         },
     "your_first_potion":{
         "name":"Brew Your First Potion",
@@ -99,7 +109,8 @@ EVENT_TEMPLATES = {
             "duration":1,
             "results":[]
             },
-        "becomes":None
+        "becomes":None,
+        "fails_to":None
         }
     }
 
@@ -137,4 +148,4 @@ def make_event(event_key):
             results=list(box_data["results"]),
         )
 
-    return Event(t["name"], t["narrative_text"], t["deadline"], slots, verbbox, t["becomes"])
+    return Event(t["name"], t["narrative_text"], t["deadline"], slots, verbbox, t["becomes"], t["fails_to"])
