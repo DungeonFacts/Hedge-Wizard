@@ -343,3 +343,43 @@ def test_verb_only_events_block_without_ack():
     assert a.is_blocking() is True
     a.ack()
     assert a.is_blocking() is False
+
+
+def test_event_without_deadline_ticks():
+    a = make_event("carve_totem")
+    assert a.tick() is True
+    assert a.verbbox.progress == 0
+    wizard = make_card("wizard")
+    a.verbbox.place_card(wizard,a.verbbox.slots[0])
+    assert a.verbbox.slots[0].card.name == "Wizard"
+    assert a.tick() is True
+    assert a.verbbox.progress == 1
+    assert a.tick() is True
+    assert a.verbbox.progress == 2
+    assert a.verbbox.slots[1].card.name == "Totem"
+    assert a.tick() is True
+    assert a.verbbox.progress == 2
+    assert a.is_blocking() is True
+
+
+def test_event_with_deadline_ticks():
+    a = make_event("sacrifice_totem")
+    totem = make_card("totem")
+    a.verbbox.place_card(totem,a.verbbox.slots[0])
+    assert a.verbbox.progress == 0
+    assert a.verbbox.slots[0].card.name == "Totem"
+    assert a.tick() is True
+    assert a.verbbox.progress == 1
+    assert a.verbbox.slots[0].card is None
+    assert a.is_blocking() is True
+
+
+def test_event_with_deadline_can_fail():
+    a = make_event("sacrifice_totem")
+    assert a.is_blocking() is False
+    assert a.deadline == 1
+    assert a.tick() is False
+    assert a.deadline == 0
+    assert a.verbbox.progress == 0
+    assert a.verbbox.duration == 1
+    #game.end_turn will now replace this with event.fails_to

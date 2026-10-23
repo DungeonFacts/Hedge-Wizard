@@ -56,12 +56,15 @@ class Event:
         
     
     def tick(self):
+        succeeds = True
         self.verbbox.start()
         self.verbbox.tick()
+        self.acknowledged = False
         if self.deadline is not None:
             self.deadline -= 1
-        self.acknowledged = False
-        return True
+            if self.deadline < (self.verbbox.duration - self.verbbox.progress):
+                succeeds = False
+        return succeeds
 
 
 
@@ -111,6 +114,34 @@ EVENT_TEMPLATES = {
             },
         "becomes":None,
         "fails_to":None
+        },
+    "carve_totem":{
+        "name":"Carve A Totem",
+        "narrative_text":"Any spare time can be spent carving totems, which are used in many rituals. They take a few turns, but you can interrupt the work at any time.",
+        "deadline":None,
+        "slots":None,
+        "verbbox":{
+            "name":"Carve a Totem",
+            "slots":[{"required_tags":{"wizard"}}],
+            "duration":2,
+            "results":["totem"]
+            },
+        "becomes":"carve_totem",
+        "fails_to":None
+        },
+    "sacrifice_totem":{
+        "name":"Sacrifice A Totem",
+        "narrative_text":"The spirits demand a sacrifice. Give them a totem before they grow angry!",
+        "deadline":1,
+        "slots":None,
+        "verbbox":{
+            "name":"Sacrifice a Totem",
+            "slots":[{"required_tags":{"totem"}, "fate":SlotFate.CONSUME}],
+            "duration":1,
+            "results":[]
+            },
+        "becomes":None,
+        "fails_to":"angry_spirits"
         }
     }
 
