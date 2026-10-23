@@ -1,6 +1,7 @@
 from models import Slot, SlotFate, VerbBox, VerbBoxState
 from cards import make_card
 from events import make_event
+from game import Game
 
 def test_make_card_results_are_not_identical():
     a = make_card("wizard")
@@ -383,3 +384,14 @@ def test_event_with_deadline_can_fail():
     assert a.verbbox.progress == 0
     assert a.verbbox.duration == 1
     #game.end_turn will now replace this with event.fails_to
+
+def test_init_game():
+    wizard = make_card("wizard")
+    carve_totem = make_event("carve_totem")
+    game = Game(inventory=[wizard], events=[carve_totem], event_queue=[], turn=1, day=1)
+    assert game.deploy_card(wizard,carve_totem.verbbox,carve_totem.verbbox.slots[0]) is True
+    assert game.inventory == []
+    assert carve_totem.verbbox.slots[0].card is wizard
+    assert game.retrieve_card(carve_totem.verbbox,carve_totem.verbbox.slots[0]) is True
+    assert game.inventory == [wizard]
+    assert carve_totem.verbbox.slots[0].card is None

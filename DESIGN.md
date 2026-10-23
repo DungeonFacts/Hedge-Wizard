@@ -150,3 +150,25 @@ A box has a name, a list of slots, a duration in ticks, a progress counter, a st
     9. For events that now have a deadline < (duration - progress), flag for replacement with failstate.
     10. For events that have a deadline of None, they will pass on UNLOADED, start() and tick() on LOADED, tick() on RUNNING, and halt to require acknowledgement if they were already COMPLETED.
     11. Pass to the engine that End Turn should either HALT, or that all Events have been ticked.
+
+## Update 10/23/26
+
+Work is complete for the events module and associated tests, and we are ready to begin implementing the game module. For a first pass, the game module will need to do the following:
+    1. Track a list of cards in inventory
+    2. Track a list of events currently active
+    3. A start_day function to increment the day counter, spawn events at the beginning of the day, which needs a list of eligible and queued events from the previous day
+    4. Track the current turn number, starting at 1 and incrementing when game.end_turn is called
+    5. A next_event function which results the becomes and fails_to properties of completed events
+    6. Tracks card position between functions (e.g. if a card is removed from a verb, it should be placed in player inventory, and vice versa). Events only know what we give them, game controls moving cards between instances.
+    7. Players will need a way to choose an event to read, and functions for placing/removing cards thereunto, and a way to return to the board overview.
+    8. Players will need a function acknowledge an event when it is complete.
+    9. Close an event when the event is acknowledged. This will require a function which removes the event from the event list.
+    10. An end_turn function which does the following:
+        a. Checks every event for is_blocking, and stops to alert the player of events to acknowledge
+        b. If no events are blocking, tick the remaining events.
+        c. Result failures with new events
+        d. Ongoing and completing events remain on board for the player to collect results next turn
+        e. Increment the turn counter
+        f. Return control to the player
+        g. If it's the last turn of the day, allow the player to collect their results, and replace End Turn with End Day
+    11. end_day will evaluate any remaining events to see if they dismiss or return to the event queue, checks inventory to pass over to the next day, increments the day counter, and returns to start_day

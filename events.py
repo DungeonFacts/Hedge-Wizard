@@ -14,7 +14,7 @@ class Event:
 
 
     def __repr__(self):
-        return f"Event({self.name},{self.deadline},{self.slots},{self.verbbox},{self.acknowledged},{self.becomes})"
+        return f"Event({self.name},{self.deadline},{self.slots},{self.verbbox},{self.acknowledged},{self.becomes},{self.fails_to})"
 
 
     def is_blocking(self):
