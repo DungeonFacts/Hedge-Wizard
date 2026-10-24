@@ -395,3 +395,13 @@ def test_init_game():
     assert game.retrieve_card(carve_totem.verbbox,carve_totem.verbbox.slots[0]) is True
     assert game.inventory == [wizard]
     assert carve_totem.verbbox.slots[0].card is None
+
+
+def test_message_window_spawn_and_card_removal_and_conclusion():
+    game = Game(inventory=[], events=[], event_queue=[], turn=1, day=1)
+    game.add_event("welcome")
+    assert game.events[0].slots[0].is_filled() is True
+    assert game.retrieve_card(verb=None, slot=game.events[0].slots[0]) is True
+    assert game.inventory[0].name == "Wizard"
+    assert game.conclude_event(game.events[0]) is True
+    assert game.events == []
