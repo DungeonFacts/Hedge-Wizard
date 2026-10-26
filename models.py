@@ -5,6 +5,7 @@ class SlotFate(Enum):
     KEEP = 1
     CONSUME = 2
     REPLACE = 3
+    SEIZE = 4
 
 
 class Slot:

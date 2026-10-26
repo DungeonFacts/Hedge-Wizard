@@ -151,7 +151,7 @@ A box has a name, a list of slots, a duration in ticks, a progress counter, a st
     10. For events that have a deadline of None, they will pass on UNLOADED, start() and tick() on LOADED, tick() on RUNNING, and halt to require acknowledgement if they were already COMPLETED.
     11. Pass to the engine that End Turn should either HALT, or that all Events have been ticked.
 
-## Update 10/23/26
+## Update 10/23/2026
 
 Work is complete for the events module and associated tests, and we are ready to begin implementing the game module. For a first pass, the game module will need to do the following:
     1. Track a list of cards in inventory
@@ -172,3 +172,24 @@ Work is complete for the events module and associated tests, and we are ready to
         f. Return control to the player
         g. If it's the last turn of the day, allow the player to collect their results, and replace End Turn with End Day
     11. end_day will evaluate any remaining events to see if they dismiss or return to the event queue, checks inventory to pass over to the next day, increments the day counter, and returns to start_day
+
+## Update 10/24/2026
+
+~~Walking through the first five turns, we initialize an instance of Game, with "intro" in the event_queue. start_turn increments the turn counter to 1, and spawns "intro". The player clicks to acknowledge the box, which both closes the message window and spawns "welcome". The player collects the wizard token, then acknowledges the event, closing it and spawning "get_started". The player places the wizard onto the slot, sees no further events to interact with, and clicks 'End Turn'. end_turn checks for any events which would block the turn from ending, and ticks each event on the board.~~ Needs revision subject to following update
+
+## Update 10/25/2026
+
+A few miscellaneous design updates:
+1. Added SlotFate.SEIZE for slots which will forcibly pull a card from inventory. For example, 'bless baby' gives you a 'baby' card. If you opt not to bless the baby and the event fails, you do not get to keep the baby card. It should spawn a window which forcibly removes the baby to the failure event so that the card can be consumed. Corresponding functions and logic are not currently implemented.
+2. Events now have a state field similar to VerbBoxState. PENDING events are newly spawned or undeclared. SUCCESS events have completed successfully and are ready for any event.becomes consequences to be evaluated, and FAILED events are ready for event.fails_to to be evaluated.
+3. game.events renamed to game.active_events for clarity
+4. game.queue_events added to evaluate event.state and update the event_queue accordingly.
+5. game.end_turn is responsible for updating event.state, queue_events reads it, and start_turn spawns the resulting list.
+6. conclude_event is now exclusively responsible for removing events (message windows, gift windows, finished events, failed events) from the active_event board. It checks to make sure all cards are claimed but otherwise fires. All event resolution tasks that it originally had are now migrated to end_turn, queue_events, and start_turn.
+7. Long-term goal is to add a schedule module, which will store daily schedules similar to how events stores individual events. The schedule will be a dictionary where each key is the turn number for the day and the value is the events to be added to the event_queue on that turn. Eventually these can be randomized / merged with other schedules to create bonus/challenge events, but for now they will be hand curated.
+
+Biggest deviation from previous thought is that rather than chaining multiple events in a single turn (only proposed scenario was the tutorial) this simplifies to a uniform "Receive Event > Respond To Event > Results Available Next Turn" model.
+
+The schedule module will eventually have curated schedules (esp. day 1), additional dictionaries for complications and good luck events, and some ability to randomize schedules. game.py will handle all local resolution (becomes and fails_to, etc) but schedules offer daily templates for event spawns.
+
+Preliminary consideration given to "interstitials" between days. First notion is a weekly "bribe the inquisitor" scene that encourages you to accumulate coins during the week for a bulk payoff, similar to Cultist Simulator seizing a coin every 60 seconds. Idea very much WIP / preliminary but offers a good way to handle bulk card transfers, which are currently very clumsy in the 1-card-1-slot model. Stacking can be handled at UI level for visuals, but designs should avoid requiring >2 copies of any given card on verb boxes.

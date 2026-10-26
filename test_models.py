@@ -3,6 +3,8 @@ from cards import make_card
 from events import make_event
 from game import Game
 
+# TEST MODELS
+
 def test_make_card_results_are_not_identical():
     a = make_card("wizard")
     b = make_card("wizard")
@@ -232,6 +234,8 @@ def test_all_fates_combined():
     assert bless_baby.slots[2].card is None
 
 
+# TEST EVENTS
+
 def test_event_basic():
     welcome = make_event("welcome")
     assert welcome.name == "Welcome"
@@ -348,17 +352,17 @@ def test_verb_only_events_block_without_ack():
 
 def test_event_without_deadline_ticks():
     a = make_event("carve_totem")
-    assert a.tick() is True
+    a.tick()
     assert a.verbbox.progress == 0
     wizard = make_card("wizard")
     a.verbbox.place_card(wizard,a.verbbox.slots[0])
     assert a.verbbox.slots[0].card.name == "Wizard"
-    assert a.tick() is True
+    a.tick()
     assert a.verbbox.progress == 1
-    assert a.tick() is True
+    a.tick()
     assert a.verbbox.progress == 2
     assert a.verbbox.slots[1].card.name == "Totem"
-    assert a.tick() is True
+    a.tick()
     assert a.verbbox.progress == 2
     assert a.is_blocking() is True
 
@@ -369,7 +373,7 @@ def test_event_with_deadline_ticks():
     a.verbbox.place_card(totem,a.verbbox.slots[0])
     assert a.verbbox.progress == 0
     assert a.verbbox.slots[0].card.name == "Totem"
-    assert a.tick() is True
+    a.tick()
     assert a.verbbox.progress == 1
     assert a.verbbox.slots[0].card is None
     assert a.is_blocking() is True
@@ -379,16 +383,19 @@ def test_event_with_deadline_can_fail():
     a = make_event("sacrifice_totem")
     assert a.is_blocking() is False
     assert a.deadline == 1
-    assert a.tick() is False
+    a.tick()
     assert a.deadline == 0
     assert a.verbbox.progress == 0
     assert a.verbbox.duration == 1
-    #game.end_turn will now replace this with event.fails_to
+#     NEEDS REVISION OR DELETION AFTER 10/26 UPDATE
+
+
+# TEST GAME
 
 def test_init_game():
     wizard = make_card("wizard")
     carve_totem = make_event("carve_totem")
-    game = Game(inventory=[wizard], events=[carve_totem], event_queue=[], turn=1, day=1)
+    game = Game(inventory=[wizard], active_events=[carve_totem], event_queue=[], turn=1, day=1)
     assert game.deploy_card(wizard,carve_totem.verbbox,carve_totem.verbbox.slots[0]) is True
     assert game.inventory == []
     assert carve_totem.verbbox.slots[0].card is wizard
@@ -398,10 +405,17 @@ def test_init_game():
 
 
 def test_message_window_spawn_and_card_removal_and_conclusion():
-    game = Game(inventory=[], events=[], event_queue=[], turn=1, day=1)
+    game = Game(inventory=[], active_events=[], event_queue=[], turn=1, day=1)
     game.add_event("welcome")
-    assert game.events[0].slots[0].is_filled() is True
-    assert game.retrieve_card(verb=None, slot=game.events[0].slots[0]) is True
+    assert game.active_events[0].slots[0].is_filled() is True
+    assert game.retrieve_card(verb=None, slot=game.active_events[0].slots[0]) is True
     assert game.inventory[0].name == "Wizard"
-    assert game.conclude_event(game.events[0]) is True
-    assert game.events == []
+    assert game.conclude_event(game.active_events[0]) is True
+    assert game.active_events == []
+
+
+def test_duplicate_events_are_not_identical():
+    game = Game(inventory=[], active_events=[], event_queue=[], turn=1, day=1)
+    game.add_event("get_started")
+    game.add_event("get_started")
+    assert game.active_events[0] is not game.active_events[1]

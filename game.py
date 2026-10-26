@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from events import make_event
+from events import EventState, make_event
+from models import VerbBoxState
 
 @dataclass()
 class Game:
     inventory: list
-    events: list
+    active_events: list
     turn: int 
     day: int 
     event_queue: list
@@ -16,6 +17,8 @@ class Game:
             if verb.place_card(card,slot) is True:
                 self.inventory.remove(card)
                 return True
+        else:
+            return False
 
 
     def retrieve_card(self, verb, slot):
@@ -34,64 +37,63 @@ class Game:
     def add_event(self, event):
         """Create a new event instance in game"""
         new_event = make_event(event)
-        self.events.append(new_event)
-        return self.events
+        self.active_events.append(new_event)
     
 
-    def conclude_event(self, event): #incomplete WIP
+    def conclude_event(self, event):
         """Acknowledge a completed event and remove it from the active event list"""
-        if event in self.events:
+        if event in self.active_events:
             event.ack()
-            if event.is_blocking() is False:
-                self.events.remove(event)
+            if event.is_blocking() is True:
+                event.acknowledged = False
+                return False
+            else:
+                self.active_events.remove(event)
                 return True
 
 
-    def make_failure(self, event):
-        """An event which fails spawns its failure result"""
-        new_event = event.fails_to
-        return self.add_event(new_event)
+    def queue_results(self):
+        """Add results from completed and failed events to the event queue"""
+        for event in self.active_events:
+            if (event.state == EventState.SUCCESS) and (event.becomes is not None):
+                self.event_queue.append(event.becomes)
+            elif (event.state == EventState.FAILED) and (event.fails_to is not None):
+                self.event_queue.append(event.fails_to)
 
 
-    def make_becomes(self, event):
-        """An event which completes before its deadline spawns its becomes field"""
-        new_event = event.becomes
-        return self.add_event(new_event)
-
-
-    def queue_event():
+    def queue_event(self):
         #add an event to the event queue
         pass
 
 
-    def choose_event():
+    def choose_event(self):
         #the player chooses an event from the active list to read, fill, claim, or acknowledge.
         pass
 
 
-    def end_turn(self): #very much WIP
-        ticked_events = []
-        failed_events = []
-        for event in self.events:
+    def end_turn(self): #still WIP
+        for event in self.active_events:
             if event.is_blocking() is True:
                 return False
-        for event in self.events:
-            if event.tick() is True:
-                ticked_events.append(event)
-            elif event.tick() is False:
-                failed_events.append(event)
-        #should end_turn stop here, and let start_turn do the following?
-        for event in ticked_events:
-            self.make_becomes(event)
-        for event in failed_events:
-            self.make_failure(event)
+        for event in self.active_events:
+            event.tick()
+            if self.verbbox.state == VerbBoxState.COMPLETED:
+                self.state = EventState.SUCCESS
+                return True
+            elif self.deadline > (self.verbbox.duration - self.verbbox.progress):
+                self.state = EventState.FAILED
+                return True
 
 
-    def start_turn():
-        #spawn new events
-        pass
+    def start_turn(self):
+        """Increment turn count, spawn queued events, empty event queue"""
+        self.turn += 1
+        turn_queue = list(self.event_queue)
+        self.event_queue.clear()
+        for event in turn_queue:
+            self.add_event(event)
 
 
-    def end_day():
+    def end_day(self):
         #conclude the current day and prepare for the next
         pass

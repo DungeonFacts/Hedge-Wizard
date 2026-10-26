@@ -1,5 +1,11 @@
+from enum import Enum
 from models import Slot, SlotFate, VerbBox, VerbBoxState
 from cards import make_card
+
+class EventState(Enum):
+    PENDING = 1
+    SUCCESS = 2
+    FAILED = 3
 
 class Event:
     def __init__(self, name, narrative_text="The text for this event has not been written.", deadline=None, slots=None, verbbox=None, becomes=None, fails_to=None):
@@ -11,6 +17,7 @@ class Event:
         self.acknowledged = False
         self.becomes = becomes
         self.fails_to = fails_to
+        self.state = EventState.PENDING
 
 
     def __repr__(self):
@@ -56,16 +63,11 @@ class Event:
         
     
     def tick(self):
-        succeeds = True
         self.verbbox.start()
         self.verbbox.tick()
         self.acknowledged = False
         if self.deadline is not None:
             self.deadline -= 1
-            if self.deadline < (self.verbbox.duration - self.verbbox.progress):
-                succeeds = False
-        return succeeds
-
 
 
 EVENT_TEMPLATES = {
