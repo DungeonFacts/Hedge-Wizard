@@ -17,6 +17,8 @@ class Game:
             if verb.place_card(card,slot) is True:
                 self.inventory.remove(card)
                 return True
+            else:
+                return False
         else:
             return False
 
@@ -77,10 +79,10 @@ class Game:
                 return False
         for event in self.active_events:
             event.tick()
-            if self.verbbox.state == VerbBoxState.COMPLETED:
+            if self.event.verbbox.state == VerbBoxState.COMPLETED:
                 self.state = EventState.SUCCESS
                 return True
-            elif self.deadline > (self.verbbox.duration - self.verbbox.progress):
+            elif self.deadline > (self.event.verbbox.duration - self.event.verbbox.progress):
                 self.state = EventState.FAILED
                 return True
 

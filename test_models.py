@@ -37,6 +37,20 @@ def test_slot_rejects_wrong_tag():
     assert altar.is_filled() is False
 
 
+def test_slot_accepts_sufficient_aspects():
+    altar = Slot(required_aspects={"herbalism":1})
+    bogweed = make_card("bogweed")
+    assert altar.place_card(bogweed) is True
+    assert altar.is_filled() is True
+    assert altar.card.name == "Bogweed"
+
+
+def test_slot_rejects_insufficient_aspects():
+    altar = Slot(required_aspects={"herbalism":4})
+    bogweed = make_card("bogweed")
+    assert altar.place_card(bogweed) is False
+
+
 def test_slot_remove_card():
     altar = Slot(required_tags={"sacred"})
     a = make_card("sacred_oil")

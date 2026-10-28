@@ -9,9 +9,10 @@ class SlotFate(Enum):
 
 
 class Slot:
-    def __init__(self, card=None, required_tags=None, fate=SlotFate.KEEP, replacement=None):
+    def __init__(self, card=None, required_tags=None, required_aspects=None, fate=SlotFate.KEEP, replacement=None):
         self.card = card
         self.required_tags = required_tags or set()
+        self.required_aspects = required_aspects
         self.fate = fate
         self.replacement = replacement
 
@@ -27,8 +28,20 @@ class Slot:
             return False
 
 
+    def meets_aspect_requirements(self, card):
+        if self.required_aspects is not None:
+            for aspect in self.required_aspects:
+                if card.aspects.get(aspect) >= self.required_aspects.get(aspect):
+                    return True
+                else:
+                    return False
+        else:
+            return True
+
+
     def place_card(self, card):
-        if self.required_tags <= card.tags and not self.is_filled():
+        requirements = [self.required_tags <= card.tags, self.meets_aspect_requirements(card), self.is_filled() == False]
+        if all(requirements):
             self.card = card
             return True
         else:
