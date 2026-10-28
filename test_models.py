@@ -401,7 +401,7 @@ def test_event_with_deadline_can_fail():
     assert a.deadline == 0
     assert a.verbbox.progress == 0
     assert a.verbbox.duration == 1
-#     NEEDS REVISION OR DELETION AFTER 10/26 UPDATE
+    #NEEDS REVISION OR DELETION AFTER 10/26 UPDATE
 
 
 # TEST GAME
