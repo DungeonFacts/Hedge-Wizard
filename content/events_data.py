@@ -1,5 +1,5 @@
 from models import SlotFate
-from enums import Way,Form
+from .enums import Way, Form
 
 EVENT_TEMPLATES = {
     "upgrade_augury_reagent":{

@@ -1,4 +1,4 @@
-from enums import Way,Form
+from .enums import Way,Form
 
 CARD_TEMPLATES = {
     "augury_reagent_1":{"name":"Augury Reagent 1","tags":{Form.REAGENT},"aspects":{Way.AUGURY:1,}},
