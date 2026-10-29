@@ -1,6 +1,6 @@
 from models import Slot, SlotFate, VerbBox, VerbBoxState
 from cards import make_card
-from events import make_event
+from events import make_event, EventState
 from game import Game
 
 def test_upgrade_augury():
@@ -11,8 +11,15 @@ def test_upgrade_augury():
     assert game.deploy_card(r1,e.verbbox,e.verbbox.slots[0]) is True
     assert game.deploy_card(r2,e.verbbox,e.verbbox.slots[1]) is True
     assert e.is_blocking() is False
-    e.tick()
+    assert game.end_turn() is True
+    game.queue_results()
+    game.start_turn()
+    assert game.turn == 2
+    assert e.state == EventState.SUCCESS
     assert e.verbbox.slots[0].card.name == "Augury Reagent 2"
     assert e.verbbox.slots[1].is_filled() is False
     assert game.retrieve_card(e.verbbox,e.verbbox.slots[0]) is True
     assert game.inventory[0].name == "Augury Reagent 2"
+    assert game.conclude_event(e) is True
+    assert game.active_events[0] is not None
+    assert len(game.active_events) == 1

@@ -73,17 +73,17 @@ class Game:
         pass
 
 
-    def end_turn(self): #still WIP
+    def end_turn(self):
         for event in self.active_events:
             if event.is_blocking() is True:
                 return False
         for event in self.active_events:
             event.tick()
-            if self.event.verbbox.state == VerbBoxState.COMPLETED:
-                self.state = EventState.SUCCESS
+            if event.verbbox.state == VerbBoxState.COMPLETED:
+                event.state = EventState.SUCCESS
                 return True
-            elif self.deadline > (self.event.verbbox.duration - self.event.verbbox.progress):
-                self.state = EventState.FAILED
+            elif event.deadline > (event.verbbox.duration - event.verbbox.progress):
+                event.state = EventState.FAILED
                 return True
 
 
